@@ -17,17 +17,36 @@ import javax.management.remote.JMXServiceURL;
 
 public class Main extends MFunc {
     public static void main(String[] args) throws Exception {
+        String mission = "";
+        String howLong;
+        String howMuch;
 		try {
-	        String mission = args[0];
-	        String howLong = args[1];
-	        String howMuch = args[1];
+	        mission = args[0];
+	        howLong = args[1];
+	        howMuch = args[1];
 	    }
 	    catch (ArrayIndexOutOfBoundsException e){
-	        System.out.println("ArrayIndexOutOfBoundsException caught");
+//	        System.out.println("ArrayIndexOutOfBoundsException caught");
 	    }
 	    finally {
-	    	System.out.println("No argument");
 	    }
+		// This part will be arguments reference
+		if ((mission.equals("help")) || (mission.equals("h"))) {
+			System.out.println("*************************************************************");
+			System.out.println("*This is a small table for you to reference this program    *");
+			System.out.println("*1 argument: What kind of mission you need                  *");
+			System.out.println("*    1.1 help (h)   : Print out this table                  *");
+			System.out.println("*    1.2 overall (o): To look at all of the attributes once *");
+			System.out.println("*2 argument: The IP you are going to connect                *");
+			System.out.println("*3 argument: The JBOSS_ADMIN                                *");
+			System.out.println("*4 argument: The JBOSS_PASSWORD                             *");
+			System.out.println("*5 argument: How many milliseconds for one sample           *");
+			System.out.println("*6 argument: The number of samples you take                 *");
+			System.out.println("*************************************************************");
+//			System.out.println("**");
+			System.exit(0);
+		}
+		if ((mission.equals("help")) || (mission.equals("o")))
 		System.out.println("Starting lookup ...");  
 		String attributeName = "StartTime";  
 		String host = "9.32.165.55";    
@@ -44,11 +63,15 @@ public class Main extends MFunc {
 		
 		
 		attributeName = new String("HeapMemoryUsage");
-		MFunc memory = new MFunc();
+		MFunc mfunc = new MFunc();
 		System.out.println("Memory:");
-		memory.getMemoryAttr(attributeName, jmxConnector);
+		mfunc.getMemoryAttr(attributeName, jmxConnector);
 		System.out.println("Runtime:");
-		memory.getRuntimeAttr(attributeName, jmxConnector);
+		mfunc.getRuntimeAttr(jmxConnector);
+		System.out.println("OS:");
+		mfunc.getOSAttr(attributeName, jmxConnector);
+		System.out.println("Threading:");
+		mfunc.getThreadsAttr(jmxConnector);
 		
 //		memory.sampleMemoryUsage(attributeName, jmxConnector, 5, 1000);
  
