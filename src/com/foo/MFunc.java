@@ -1,7 +1,16 @@
 package com.foo;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Set;
+import java.util.Vector;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -13,54 +22,73 @@ import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 import javax.management.remote.JMXConnector;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import com.foo.Memory;
+
 public class MFunc{	
 	private CompositeData cd = null;
 	private Object Mbean = null;
 	private Object osMbean = null;
+	private Vector<Object> objVec = new Vector<Object>();
+	
+	// This is the place I store my variable;
+	private Memory memory = new Memory();
+	private Threads threads = new Threads();
+	private Runtime runtime = new Runtime();
+	
 	// This function do output and return output
-	public CompositeData outputCDAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
-		CompositeData tempt = null;
+	public CompositeData outputCDAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName,boolean printout) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
 		//get an instance of the Mbean
 		Mbean = jmxConnector.getMBeanServerConnection().getAttribute(
 				new ObjectName(ObjectNameStr), attributeName);
-		cd = (CompositeData) Mbean;
+		cd = (CompositeData)Mbean;
 		Set<String> keys = cd.getCompositeType().keySet();
-		for (String item:keys) {
-			System.out.format("%-35s:" ,attributeName + "(" + item + ")");
-			System.out.println(cd.get(item).toString());
+		if (printout) { 
+			for (String item:keys) {
+				System.out.format("%-35s:" ,attributeName + "(" + item + ")");
+				System.out.println(cd.get(item).toString());
+			}
 		}
 		return cd;
 	}
 	// This function is for returning Long Attributes one 
-	public long outputLongAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
+	public long outputLongAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName,boolean printout) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
 		long tempt;
 		Mbean = jmxConnector.getMBeanServerConnection().getAttribute(
 				new ObjectName(ObjectNameStr), attributeName);
 		tempt = Long.parseLong(Mbean.toString());
-		System.out.format("%-35s:" , attributeName);
-		System.out.println(Long.toString(tempt));
+		if(printout) {
+			System.out.format("%-35s:" , attributeName);
+			System.out.println(Long.toString(tempt));
+		}
 		return tempt;
 	}
 	// This function is for returning float Attributes one 
-	public float outputFloatAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
+	public float outputFloatAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName,boolean printout) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
 		float tempt;
 		//get an instance of the Mbean
 		Mbean = jmxConnector.getMBeanServerConnection().getAttribute(
 				new ObjectName(ObjectNameStr), attributeName);
 		tempt = Float.parseFloat(Mbean.toString());
-		System.out.format("%-35s:" , attributeName);
-		System.out.println(Float.toString(tempt));
+		if(printout) {
+			System.out.format("%-35s:" , attributeName);
+			System.out.println(Float.toString(tempt));
+		}
 		return tempt;
 	}
 	// This function is for returning String Attributes one 
-	public String outputStrAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
+	public String outputStrAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName,boolean printout) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
 		String tempt;
 		//get an instance of the Mbean
 		Mbean = jmxConnector.getMBeanServerConnection().getAttribute(
 				new ObjectName(ObjectNameStr), attributeName);
 		tempt = Mbean.toString();
-		System.out.format("%-35s:" , attributeName);
-		System.out.println(tempt);
+		if(printout) {
+			System.out.format("%-35s:" , attributeName);
+			System.out.println(tempt);
+		}
 		return tempt;
 	}
 //	This one apparently have some problem == > need more research on it
@@ -74,65 +102,78 @@ public class MFunc{
 		return tempt;
 	}
 	// This function is for returning Boolean Attributes one 
-	public boolean outputBoolAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
+	public boolean outputBoolAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName,boolean printout) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
 		boolean tempt;
 		//get an instance of the Mbean
 		Mbean = jmxConnector.getMBeanServerConnection().getAttribute(
 				new ObjectName(ObjectNameStr), attributeName);
 		tempt = Boolean.parseBoolean(Mbean.toString());
-		System.out.format("%-35s:" , attributeName);
-		System.out.println(tempt);
-		return tempt;
+		if (printout) {
+			System.out.format("%-35s:" , attributeName);
+			System.out.println(tempt);
+		}
+		return Boolean.valueOf(tempt);
 	}
+	// This is for output json
+	public void writeJson() throws Exception {
+		JSONObject json = new JSONObject();
+		for (Object item:objVec) {
+			JSONObject jsonObj = new JSONObject();
+			jsonObj = ((Parts) item).putValueInJson(jsonObj);
+			json.put(item.getClass().toString(),jsonObj);
+		}
+        Files.write(Paths.get("output.json"), json.toString().getBytes());
+    }
 	// ------------------------------------------------
 	// This function is for printing out Memory Attributes
-	public void getMemoryAttr(String attributeName,JMXConnector jmxConnector) 
-			throws MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException, MBeanException,
-				ReflectionException, IOException {	
-		//get an HeapMemoryUsage instance ... this is a CompositeData
-		CompositeData HeapMemoryUsage = outputCDAttr(jmxConnector,"java.lang:type=Memory","HeapMemoryUsage");
-		CompositeData NonHeapMemoryUsage = outputCDAttr(jmxConnector,"java.lang:type=Memory","NonHeapMemoryUsage");
-		long ObjectPendingFinalizationCount = outputLongAttr(jmxConnector,"java.lang:type=Memory","ObjectPendingFinalizationCount");
-		boolean Verbose = outputBoolAttr(jmxConnector,"java.lang:type=Memory","Verbose");
+	public void getMemoryAttr(JMXConnector jmxConnector,boolean printout) 
+			throws Exception {	
+		//Store what we get into Memory.java instance
+		memory.setHeapMemoryUsage(outputCDAttr(jmxConnector,"java.lang:type=Memory","HeapMemoryUsage", printout));
+		memory.setNonHeapMemoryUsage(outputCDAttr(jmxConnector,"java.lang:type=Memory","NonHeapMemoryUsage", printout));
+		memory.setObjectPendingFinalizationCount(outputLongAttr(jmxConnector,"java.lang:type=Memory","ObjectPendingFinalizationCount", printout));
+		memory.setVerbose(outputBoolAttr(jmxConnector,"java.lang:type=Memory","Verbose", printout));
+		objVec.add(memory);
 	}
-	
-	public void getThreadsAttr(JMXConnector jmxConnector) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
-		boolean ThreadAllocatedMemorySupported =  outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadAllocatedMemorySupported");
-		boolean ThreadAllocatedMemoryEnabled = outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadAllocatedMemoryEnabled");
-		boolean ThreadContentionMonitoringSupported = outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadContentionMonitoringSupported");
-		boolean CurrentThreadCpuTimeSupported = outputBoolAttr(jmxConnector,"java.lang:type=Threading","CurrentThreadCpuTimeSupported");
-		boolean ObjectMonitorUsageSupported = outputBoolAttr(jmxConnector,"java.lang:type=Threading","ObjectMonitorUsageSupported");
-		boolean SynchronizerUsageSupported = outputBoolAttr(jmxConnector,"java.lang:type=Threading","SynchronizerUsageSupported");
-		boolean ThreadContentionMonitoringEnabled = outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadContentionMonitoringEnabled");
-		boolean ThreadCpuTimeEnabled = outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadCpuTimeEnabled");
-		long PeakThreadCount = outputLongAttr(jmxConnector,"java.lang:type=Threading","PeakThreadCount");
-		long DaemonThreadCount = outputLongAttr(jmxConnector,"java.lang:type=Threading","DaemonThreadCount");
-		long ThreadCount = outputLongAttr(jmxConnector,"java.lang:type=Threading","ThreadCount");
-		long TotalStartedThreadCount = outputLongAttr(jmxConnector,"java.lang:type=Threading","TotalStartedThreadCount");
+	public void getThreadsAttr(JMXConnector jmxConnector, boolean printout) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
+		threads.setThreadAllocatedMemoryEnabled(outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadAllocatedMemorySupported",printout));
+		threads.setThreadAllocatedMemoryEnabled(outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadAllocatedMemoryEnabled",printout));
+		threads.setThreadContentionMonitoringSupported(outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadContentionMonitoringSupported",printout));
+		threads.setCurrentThreadCpuTimeSupported(outputBoolAttr(jmxConnector,"java.lang:type=Threading","CurrentThreadCpuTimeSupported",printout));
+		threads.setObjectMonitorUsageSupported(outputBoolAttr(jmxConnector,"java.lang:type=Threading","ObjectMonitorUsageSupported",printout));
+		threads.setSynchronizerUsageSupported(outputBoolAttr(jmxConnector,"java.lang:type=Threading","SynchronizerUsageSupported",printout));
+		threads.setThreadContentionMonitoringEnabled(outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadContentionMonitoringEnabled",printout));
+		threads.setThreadCpuTimeEnabled(outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadCpuTimeEnabled",printout));
+		threads.setPeakThreadCount(outputLongAttr(jmxConnector,"java.lang:type=Threading","PeakThreadCount",printout));
+		threads.setDaemonThreadCount(outputLongAttr(jmxConnector,"java.lang:type=Threading","DaemonThreadCount",printout));
+		threads.setThreadCount(outputLongAttr(jmxConnector,"java.lang:type=Threading","ThreadCount",printout));
+		threads.setTotalStartedThreadCount(outputLongAttr(jmxConnector,"java.lang:type=Threading","TotalStartedThreadCount",printout));
 		// This one should be array but need more research how to do it
-		String AllThreadIds = outputStrAttr(jmxConnector,"java.lang:type=Threading","AllThreadIds");
-		long CurrentThreadCpuTime = outputLongAttr(jmxConnector,"java.lang:type=Threading","CurrentThreadCpuTime");
-		long CurrentThreadUserTime = outputLongAttr(jmxConnector,"java.lang:type=Threading","CurrentThreadUserTime");
-		boolean ThreadCpuTimeSupported = outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadCpuTimeSupported");
+		threads.setAllThreadIds(outputStrAttr(jmxConnector,"java.lang:type=Threading","AllThreadIds",printout));
+		threads.setCurrentThreadCpuTime(outputLongAttr(jmxConnector,"java.lang:type=Threading","CurrentThreadCpuTime",printout));
+		threads.setCurrentThreadUserTime(outputLongAttr(jmxConnector,"java.lang:type=Threading","CurrentThreadUserTime",printout));
+		threads.setThreadCpuTimeSupported(outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadCpuTimeSupported",printout));
+		objVec.add(threads);
 	}
-	public void getRuntimeAttr(JMXConnector jmxConnector) 
+	public void getRuntimeAttr(JMXConnector jmxConnector, boolean printout) 
 			throws MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException, MBeanException,
 				ReflectionException, IOException {	
-		String VmName = outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmName");
-		String VmVendor = outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmVendor");
-		String VmVersion = outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmVersion");
-		String SpecName = outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecName");
-		String ManagementSpecVersion = outputStrAttr(jmxConnector,"java.lang:type=Runtime","ManagementSpecVersion");
-		String LibraryPath = outputStrAttr(jmxConnector,"java.lang:type=Runtime","LibraryPath");
-		boolean BootClassPathSupported = outputBoolAttr(jmxConnector,"java.lang:type=Runtime","BootClassPathSupported");
-		String BootClassPath = outputStrAttr(jmxConnector,"java.lang:type=Runtime","BootClassPath");
-		String InputArguments = outputStrAttr(jmxConnector,"java.lang:type=Runtime","InputArguments");
-		long Uptime = outputLongAttr(jmxConnector,"java.lang:type=Runtime","Uptime");
-		String SpecVersion = outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecVersion");
-		String SpecVendor = outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecVendor");
-		long startTime = outputLongAttr(jmxConnector,"java.lang:type=Runtime","StartTime");
+		runtime.setVmName(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmName".printout));
+		runtime.setVmVendor(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmVendor".printout));
+		runtime.setVmVersion(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmVersion".printout));
+		runtime.setSpecName(outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecName".printout));
+		runtime.setManagementSpecVersion(outputStrAttr(jmxConnector,"java.lang:type=Runtime","ManagementSpecVersion".printout));
+		runtime.setLibraryPath(outputStrAttr(jmxConnector,"java.lang:type=Runtime","LibraryPath".printout));
+		runtime.setBootClassPathSupported(outputBoolAttr(jmxConnector,"java.lang:type=Runtime","BootClassPathSupported".printout));
+		runtime.setBootClassPath(outputStrAttr(jmxConnector,"java.lang:type=Runtime","BootClassPath".printout));
+		runtime.setInputArguments(outputStrAttr(jmxConnector,"java.lang:type=Runtime","InputArguments".printout));
+		runtime.setUptime(outputLongAttr(jmxConnector,"java.lang:type=Runtime","Uptime".printout));
+		runtime.setSpecVersion(outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecVersion".printout));
+		runtime.setSpecVendor(outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecVendor".printout));
+		runtime.setstartTime(outputLongAttr(jmxConnector,"java.lang:type=Runtime","StartTime".printout));
+		objVec.add(runtime);
 	}
-	public void getOSAttr(String attributeName,JMXConnector jmxConnector) 
+	public void getOSAttr(JMXConnector jmxConnector) 
 			throws MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException, MBeanException,
 				ReflectionException, IOException {	
 		long OpenFileDescriptorCount = outputLongAttr(jmxConnector,
