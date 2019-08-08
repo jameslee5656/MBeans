@@ -3,6 +3,7 @@ package com.foo;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.Vector;
 
@@ -115,7 +116,8 @@ public class MFunc{
 			jsonObj = ((Parts) item).putValueInJson(jsonObj);
 			json.put(item.getClass().toString(),jsonObj);
 		}
-        Files.write(Paths.get("output.json"), json.toString().getBytes());
+		LocalDateTime time = LocalDateTime.now();
+        Files.write(Paths.get(time.toString() + ".json"), json.toString().getBytes());
     }
 	// ------------------------------------------------
 	// This function is for printing out Memory Attributes

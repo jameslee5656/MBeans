@@ -3,12 +3,69 @@ package com.foo;
 import java.util.HashMap;
 import java.util.Map;
 
-//import java.lang.management.ManagementFactory;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
 public class Main extends MFunc {
+	public static void sampleUsage(MFunc mfunc, JMXConnector jmxConnector, String mission, String parts) throws Exception {
+    	boolean printout;
+    	if ((mission.contains("e") && mission.contains("v"))){
+    		printout = true;
+			if(parts.contains("a")||parts.equals("all")||parts.contains("M")||parts.contains("m")) {
+				System.out.println("Memory:");
+				mfunc.getMemoryAttr(jmxConnector,printout);
+			}
+			if(parts.contains("a")||parts.equals("all")||parts.contains("R")||parts.contains("r")) {
+				System.out.println("Runtime:");
+				mfunc.getRuntimeAttr(jmxConnector,printout);
+			}
+			if(parts.contains("a")||parts.equals("all")||parts.contains("O")||parts.contains("o")) {
+				System.out.println("Operating System:");
+				mfunc.getOSAttr(jmxConnector,printout);
+			}
+			if(parts.contains("a")||parts.equals("all")||parts.contains("T")||parts.contains("t")) {
+				System.out.println("Threading:");
+				mfunc.getThreadsAttr(jmxConnector,printout);
+			}
+			mfunc.writeJson();
+    	}
+    	else if ((mission.equals("view")) || (mission.contains("v"))) {
+			printout = true;
+			if(parts.contains("a")||parts.equals("all")||parts.contains("M")||parts.contains("m")) {
+				System.out.println("Memory:");
+				mfunc.getMemoryAttr(jmxConnector,printout);
+			}
+			if(parts.contains("a")||parts.equals("all")||parts.contains("R")||parts.contains("r")) {
+				System.out.println("Runtime:");
+				mfunc.getRuntimeAttr(jmxConnector,printout);
+			}
+			if(parts.contains("a")||parts.equals("all")||parts.contains("O")||parts.contains("o")) {
+				System.out.println("Operating System:");
+				mfunc.getOSAttr(jmxConnector,printout);
+			}
+			if(parts.contains("a")||parts.equals("all")||parts.contains("T")||parts.contains("t")) {
+				System.out.println("Threading:");
+				mfunc.getThreadsAttr(jmxConnector,printout);
+			}
+		}
+		else if ((mission.equals("export")) || (mission.contains("e"))){
+			printout = false;
+			if(parts.contains("a")||parts.equals("all")||parts.contains("M")||parts.contains("m")) {
+				mfunc.getMemoryAttr(jmxConnector,printout);
+			}
+			if(parts.contains("a")||parts.equals("all")||parts.contains("R")||parts.contains("r")) {
+				mfunc.getRuntimeAttr(jmxConnector,printout);
+			}
+			if(parts.contains("a")||parts.equals("all")||parts.contains("O")||parts.contains("o")) {
+				mfunc.getOSAttr(jmxConnector,printout);
+			}
+			if(parts.contains("a")||parts.equals("all")||parts.contains("T")||parts.contains("t")) {
+				mfunc.getThreadsAttr(jmxConnector,printout);
+			}
+			mfunc.writeJson();
+		}
+    }
     public static void main(String[] args) throws Exception {
         String mission = "";
         String parts   = "";
@@ -25,8 +82,8 @@ public class Main extends MFunc {
 	        JBOSS_ADMIN = args[3];
 	        JBOSS_PASSWORD = args[4];
 	        parts   = args[5];
-	        howLong = args[6];
-	        howMuch = args[7];
+	        howMuch = args[6];
+	        howLong = args[7];
 	    }
 	    catch (ArrayIndexOutOfBoundsException e){
 //	        System.out.println("ArrayIndexOutOfBoundsException caught");
@@ -38,9 +95,12 @@ public class Main extends MFunc {
 			System.out.println("|**************************************************************|");
 			System.out.println("|This is a small table for you to reference this program       |");
 			System.out.println("|1 argument: What kind of mission you need                     |");
-			System.out.println("|    1.1 help (h)     : Print out this table                   |");
-			System.out.println("|    1.2 view  (v): To view the attributes once                |");
-			System.out.println("|    1.3 export(e): Export a json file                         |");
+			System.out.println("|    1.1 help  (H,h): Print out this table                     |");
+			System.out.println("|    1.2 view  (V,v): To view the attributes once              |");
+			System.out.println("|    1.3 export(E,e): Export a json file                       |");
+			System.out.println("|    1.4 auto  (A,a): Do automation task                       |");
+			System.out.println("|    (If you would like to do multiple things just type the    |");
+			System.out.println("|        multiple uppercase => AE auto export)                 |");
 			System.out.println("|2 argument: The IP you are going to connect                   |");
 			System.out.println("|3 argument: The Port you are going to use                     |");
 			System.out.println("|4 argument: The JBOSS_ADMIN                                   |");
@@ -54,11 +114,11 @@ public class Main extends MFunc {
 			System.out.println("|    6.5 T    (t) : Threading                                  |");
 			System.out.println("|    (Multiple like you need Memory and Runtime just type RM)  |");
 			System.out.println("|    (The arrangement of every UpperCase Letter doesn't matter)|");
-			System.out.println("|7 argument: How many milliseconds for one sample              |");
-			System.out.println("|8 argument: The number of samples you take                    |");
+			System.out.println("|7 argument: The number of samples you take                    |");
+			System.out.println("|8 argument: How many milliseconds for one sample              |");
 			System.out.println("***************************************************************|");
-			System.out.println("| |----------|----------|----------| ... 3 times   (the 8 argu)|");
-			System.out.println("|  5 millisec 5 millisec 5 millisec  ... 5 millisec(the 7 argu)|");
+			System.out.println("| |----------|----------|----------| ... 3 times   (the 7 argu)|");
+			System.out.println("|  5 millisec 5 millisec 5 millisec  ... 5 millisec(the 8 argu)|");
 			System.out.println("***************************************************************|");
 //			System.out.println("||");
 			System.exit(0);
@@ -88,31 +148,17 @@ public class Main extends MFunc {
 		JMXConnector jmxConnector = JMXConnectorFactory.connect(serviceURL, env);
 		MFunc mfunc = new MFunc();
 		
-		if ((mission.equals("view")) || (mission.equals("v"))) {
-			boolean printout = true;
-			if ((mission.equals("export")) || (mission.equals("e"))){
-				printout = false;
-			}
-			if(parts.contains("a")||parts.equals("all")||parts.contains("M")||parts.contains("m")) {
-				System.out.println("Memory:");
-				mfunc.getMemoryAttr(jmxConnector,printout);
-			}
-			if(parts.contains("a")||parts.equals("all")||parts.contains("R")||parts.contains("r")) {
-				System.out.println("Runtime:");
-				mfunc.getRuntimeAttr(jmxConnector,printout);
-			}
-			if(parts.contains("a")||parts.equals("all")||parts.contains("O")||parts.contains("o")) {
-				System.out.println("Operating System:");
-				mfunc.getOSAttr(jmxConnector,printout);
-			}
-			if(parts.contains("a")||parts.equals("all")||parts.contains("T")||parts.contains("t")) {
-				System.out.println("Threading:");
-				mfunc.getThreadsAttr(jmxConnector,printout);
-			}
+		if ((mission.contains("A") || mission.contains("a"))) {
+			for (int i = 0; i < Integer.parseInt(howMuch); i++) {
+				sampleUsage(mfunc,jmxConnector,mission,parts);
+		    	Thread.sleep(Integer.parseInt(howLong)); //delay for one second
+	    	}
 		}
-		mfunc.writeJson();
+		else {
+			sampleUsage(mfunc,jmxConnector,mission,parts);
+		}
 		
-//		memory.sampleMemoryUsage(attributeName, jmxConnector, 5, 1000);
+// 		memory.sampleMemoryUsage(attributeName, jmxConnector, 5, 1000);
  
     }
 }
