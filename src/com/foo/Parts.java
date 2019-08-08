@@ -7,5 +7,4 @@ public interface Parts {
 	public default JSONObject putValueInJson(JSONObject json) throws JSONException {
 		return json;
 	}
-
 }

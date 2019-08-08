@@ -5,7 +5,6 @@ import java.util.Set;
 import javax.management.openmbean.CompositeData;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONArray;
 
 public class Memory implements Parts{
 	protected CompositeData HeapMemoryUsage;
@@ -42,21 +41,18 @@ public class Memory implements Parts{
 	}
 	public JSONObject putValueInJson(JSONObject json) throws JSONException {
 		Set<String> keys = HeapMemoryUsage.getCompositeType().keySet();
-		JSONArray arr = new JSONArray();
+		JSONObject tempt = new JSONObject();
 		for (String item:keys) {
-			
-			JSONObject tempt = new JSONObject();
-			arr.put(tempt.put(item, HeapMemoryUsage.get(item)));
+			tempt.put(item, HeapMemoryUsage.get(item));
 		}
-		json.put("HeapMemoryUsage",arr);
+		json.put("HeapMemoryUsage",tempt);
 		keys = NonHeapMemoryUsage.getCompositeType().keySet();
-		arr = new JSONArray();
+		
+		tempt = new JSONObject();
 		for (String item:keys) {
-			
-			JSONObject tempt = new JSONObject();
-			arr.put(tempt.put(item, NonHeapMemoryUsage.get(item)));
+			tempt.put(item, NonHeapMemoryUsage.get(item));
 		}
-		json.put("NonHeapMemoryUsage",arr);
+		json.put("NonHeapMemoryUsage",tempt);
 		json.put("ObjectPendingFinalizationCount", ObjectPendingFinalizationCount);
 		json.put("Verbose",Verbose);
 		return json;

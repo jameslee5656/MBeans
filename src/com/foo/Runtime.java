@@ -57,8 +57,19 @@ public class Runtime implements Parts{
 		this.startTime=startTime;
 	}
 	public JSONObject putValueInJson(JSONObject json) throws JSONException {
-		
+		json.put("VmName",VmName);
+		json.put("VmVendor",VmVendor);
+		json.put("VmVersion",VmVersion);
+		json.put("SpecName",SpecName);
+		json.put("ManagementSpecVersion",ManagementSpecVersion);
+		json.put("LibraryPath",LibraryPath);
+		json.put("BootClassPathSupported",BootClassPathSupported);
+		json.put("BootClassPath",BootClassPath);
+		json.put("InputArguments",InputArguments);
+		json.put("Uptime",Uptime);
+		json.put("SpecVersion",SpecVersion);
+		json.put("SpecVendor",SpecVendor);
+		json.put("startTime",startTime);
 		return json;
 	}
-
 }

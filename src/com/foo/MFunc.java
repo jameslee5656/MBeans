@@ -1,28 +1,20 @@
 package com.foo;
 
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.Vector;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 import javax.management.remote.JMXConnector;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import com.foo.Memory;
@@ -37,6 +29,7 @@ public class MFunc{
 	private Memory memory = new Memory();
 	private Threads threads = new Threads();
 	private Runtime runtime = new Runtime();
+	private OS os = new OS();
 	
 	// This function do output and return output
 	public CompositeData outputCDAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName,boolean printout) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
@@ -158,52 +151,39 @@ public class MFunc{
 	public void getRuntimeAttr(JMXConnector jmxConnector, boolean printout) 
 			throws MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException, MBeanException,
 				ReflectionException, IOException {	
-		runtime.setVmName(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmName".printout));
-		runtime.setVmVendor(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmVendor".printout));
-		runtime.setVmVersion(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmVersion".printout));
-		runtime.setSpecName(outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecName".printout));
-		runtime.setManagementSpecVersion(outputStrAttr(jmxConnector,"java.lang:type=Runtime","ManagementSpecVersion".printout));
-		runtime.setLibraryPath(outputStrAttr(jmxConnector,"java.lang:type=Runtime","LibraryPath".printout));
-		runtime.setBootClassPathSupported(outputBoolAttr(jmxConnector,"java.lang:type=Runtime","BootClassPathSupported".printout));
-		runtime.setBootClassPath(outputStrAttr(jmxConnector,"java.lang:type=Runtime","BootClassPath".printout));
-		runtime.setInputArguments(outputStrAttr(jmxConnector,"java.lang:type=Runtime","InputArguments".printout));
-		runtime.setUptime(outputLongAttr(jmxConnector,"java.lang:type=Runtime","Uptime".printout));
-		runtime.setSpecVersion(outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecVersion".printout));
-		runtime.setSpecVendor(outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecVendor".printout));
-		runtime.setstartTime(outputLongAttr(jmxConnector,"java.lang:type=Runtime","StartTime".printout));
+		runtime.setVmName(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmName",printout));
+		runtime.setVmVendor(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmVendor",printout));
+		runtime.setVmVersion(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmVersion",printout));
+		runtime.setSpecName(outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecName",printout));
+		runtime.setManagementSpecVersion(outputStrAttr(jmxConnector,"java.lang:type=Runtime","ManagementSpecVersion",printout));
+		runtime.setLibraryPath(outputStrAttr(jmxConnector,"java.lang:type=Runtime","LibraryPath",printout));
+		runtime.setBootClassPathSupported(outputBoolAttr(jmxConnector,"java.lang:type=Runtime","BootClassPathSupported",printout));
+		runtime.setBootClassPath(outputStrAttr(jmxConnector,"java.lang:type=Runtime","BootClassPath",printout));
+		runtime.setInputArguments(outputStrAttr(jmxConnector,"java.lang:type=Runtime","InputArguments",printout));
+		runtime.setUptime(outputLongAttr(jmxConnector,"java.lang:type=Runtime","Uptime",printout));
+		runtime.setSpecVersion(outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecVersion",printout));
+		runtime.setSpecVendor(outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecVendor",printout));
+		runtime.setstartTime(outputLongAttr(jmxConnector,"java.lang:type=Runtime","StartTime",printout));
 		objVec.add(runtime);
 	}
-	public void getOSAttr(JMXConnector jmxConnector) 
+	public void getOSAttr(JMXConnector jmxConnector,boolean printout) 
 			throws MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException, MBeanException,
 				ReflectionException, IOException {	
-		long OpenFileDescriptorCount = outputLongAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","OpenFileDescriptorCount");
-		long MaxFileDescriptorCount =outputLongAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","MaxFileDescriptorCount");
-		long CommittedVirtualMemorySize=outputLongAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","CommittedVirtualMemorySize");
-		long TotalSwapSpaceSize=outputLongAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","TotalSwapSpaceSize");
-		long FreeSwapSpaceSize=outputLongAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","FreeSwapSpaceSize");
-		long ProcessCpuTime=outputLongAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","ProcessCpuTime");
-		long FreePhysicalMemorySize=outputLongAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","FreePhysicalMemorySize");
-		long TotalPhysicalMemorySize=outputLongAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","TotalPhysicalMemorySize");
-		float SystemCpuLoad=outputFloatAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","SystemCpuLoad");
-		float ProcessCpuLoad=outputFloatAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","ProcessCpuLoad");
-		String Version=outputStrAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","Version");
-		String AvailableProcessors=outputStrAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","AvailableProcessors");
-		String Arch=outputStrAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","Arch");
-		String SystemLoadAverage=outputStrAttr(jmxConnector,
-				"java.lang:type=OperatingSystem","SystemLoadAverage");
+		os.setOpenFileDescriptorCount(outputLongAttr(jmxConnector,"java.lang:type=OperatingSystem","OpenFileDescriptorCount",printout));
+		os.setMaxFileDescriptorCount(outputLongAttr(jmxConnector,"java.lang:type=OperatingSystem","MaxFileDescriptorCount",printout));
+		os.setCommittedVirtualMemorySize(outputLongAttr(jmxConnector,"java.lang:type=OperatingSystem","CommittedVirtualMemorySize",printout));
+		os.setTotalSwapSpaceSize(outputLongAttr(jmxConnector,"java.lang:type=OperatingSystem","TotalSwapSpaceSize",printout));
+		os.setFreeSwapSpaceSize(outputLongAttr(jmxConnector,"java.lang:type=OperatingSystem","FreeSwapSpaceSize",printout));
+		os.setProcessCpuTime(outputLongAttr(jmxConnector,"java.lang:type=OperatingSystem","ProcessCpuTime",printout));
+		os.setFreePhysicalMemorySize(outputLongAttr(jmxConnector,"java.lang:type=OperatingSystem","FreePhysicalMemorySize",printout));
+		os.setTotalPhysicalMemorySize(outputLongAttr(jmxConnector,"java.lang:type=OperatingSystem","TotalPhysicalMemorySize",printout));
+		os.setSystemCpuLoad(outputFloatAttr(jmxConnector,"java.lang:type=OperatingSystem","SystemCpuLoad",printout));
+		os.setProcessCpuLoad(outputFloatAttr(jmxConnector,"java.lang:type=OperatingSystem","ProcessCpuLoad",printout));
+		os.setVersion(outputStrAttr(jmxConnector,"java.lang:type=OperatingSystem","Version",printout));
+		os.setAvailableProcessors(outputStrAttr(jmxConnector,"java.lang:type=OperatingSystem","AvailableProcessors",printout));
+		os.setArch(outputStrAttr(jmxConnector,"java.lang:type=OperatingSystem","Arch",printout));
+		os.setSystemLoadAverage(outputStrAttr(jmxConnector,"java.lang:type=OperatingSystem","SystemLoadAverage",printout));
+		objVec.add(os);
 	}
 	public void sampleMemoryUsage(String attributeName, JMXConnector jmxConnector, int sampleCount, 
 										long sampleMilliSecond) 
