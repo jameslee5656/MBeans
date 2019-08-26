@@ -1,5 +1,7 @@
 package com.foo;
 
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,7 +19,7 @@ public class Threads implements Parts{
 	private long ThreadCount;
 	private long TotalStartedThreadCount;
 	// This one should be array but need more research how to do it
-	private String AllThreadIds;
+	private Map<String, Object> AllThreadIds;
 	private long CurrentThreadCpuTime;
 	private long CurrentThreadUserTime;
 	private boolean ThreadCpuTimeSupported;
@@ -57,7 +59,7 @@ public class Threads implements Parts{
 	public void setTotalStartedThreadCount(long TotalStartedThreadCount) {
 		this.TotalStartedThreadCount = TotalStartedThreadCount;
 	}
-	public void setAllThreadIds(String AllThreadIds) {
+	public void setAllThreadIds(Map<String, Object> AllThreadIds) {
 		this.AllThreadIds = AllThreadIds;
 	}
 	public void setCurrentThreadCpuTime(long CurrentThreadCpuTime) {

@@ -1,5 +1,7 @@
 package com.foo;
 
+import java.util.Map;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -12,7 +14,7 @@ public class Runtime implements Parts{
 	private String LibraryPath;
 	private boolean BootClassPathSupported;
 	private String BootClassPath;
-	private String InputArguments;
+	private Map<String, Object> InputArguments;
 	private long Uptime;
 	private String SpecVersion;
 	private String SpecVendor;
@@ -41,7 +43,7 @@ public class Runtime implements Parts{
 	public void setBootClassPath (String BootClassPath) {
 		this.BootClassPath=BootClassPath;
 	}
-	public void setInputArguments (String InputArguments) {
+	public void setInputArguments (Map<String, Object> InputArguments) {
 		this.InputArguments=InputArguments;
 	}
 	public void setUptime (long Uptime) {

@@ -4,12 +4,20 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
+import javax.management.IntrospectionException;
+import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
+import javax.management.MBeanInfo;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
@@ -86,14 +94,24 @@ public class MFunc{
 		return tempt;
 	}
 //	This one apparently have some problem == > need more research on it
-	public String[] outputStrarrAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
-		String [] tempt = null;
-		//get an instance of the Mbean
-		Mbean = jmxConnector.getMBeanServerConnection().getClass();
-		cd = (CompositeData) Mbean;
-		System.out.println("Debug:" + Mbean.toString());
-//		System.out.format("%-35s:" , attributeName);
-		return tempt;
+	public Map<String, Object>  outputStrmapAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName,boolean printout) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException, IntrospectionException {
+	    MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();    
+		// Query all attributes and values
+	    ObjectName name = new ObjectName(ObjectNameStr);
+	    MBeanInfo info = mbsc.getMBeanInfo(name);
+	    MBeanAttributeInfo[] attrInfo = info.getAttributes();
+	    Map<String, Object> map = new HashMap<>();
+	    for (MBeanAttributeInfo attr : attrInfo) {
+	        if (attr.isReadable()) {
+	            //System.out.println("\t" + attr.getName() + " = " + mbsc.getAttribute(name, attr.getName()));
+	            map.put(attr.getName(), mbsc.getAttribute(name, attr.getName()));
+	            }
+	        }
+	    if(printout) {
+			System.out.format("%-35s:" , attributeName);
+			System.out.println(map);
+		}
+		return map;
 	}
 	// This function is for returning Boolean Attributes one 
 	public boolean outputBoolAttr(JMXConnector jmxConnector,String ObjectNameStr,String attributeName,boolean printout) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
@@ -130,7 +148,7 @@ public class MFunc{
 		memory.setVerbose(outputBoolAttr(jmxConnector,"java.lang:type=Memory","Verbose", printout));
 		objVec.add(memory);
 	}
-	public void getThreadsAttr(JMXConnector jmxConnector, boolean printout) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException {
+	public void getThreadsAttr(JMXConnector jmxConnector, boolean printout) throws AttributeNotFoundException, InstanceNotFoundException, MalformedObjectNameException, MBeanException, ReflectionException, IOException, IntrospectionException {
 		threads.setThreadAllocatedMemoryEnabled(outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadAllocatedMemorySupported",printout));
 		threads.setThreadAllocatedMemoryEnabled(outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadAllocatedMemoryEnabled",printout));
 		threads.setThreadContentionMonitoringSupported(outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadContentionMonitoringSupported",printout));
@@ -144,7 +162,7 @@ public class MFunc{
 		threads.setThreadCount(outputLongAttr(jmxConnector,"java.lang:type=Threading","ThreadCount",printout));
 		threads.setTotalStartedThreadCount(outputLongAttr(jmxConnector,"java.lang:type=Threading","TotalStartedThreadCount",printout));
 		// This one should be array but need more research how to do it
-		threads.setAllThreadIds(outputStrAttr(jmxConnector,"java.lang:type=Threading","AllThreadIds",printout));
+		threads.setAllThreadIds(outputStrmapAttr(jmxConnector,"java.lang:type=Threading","AllThreadIds",printout));
 		threads.setCurrentThreadCpuTime(outputLongAttr(jmxConnector,"java.lang:type=Threading","CurrentThreadCpuTime",printout));
 		threads.setCurrentThreadUserTime(outputLongAttr(jmxConnector,"java.lang:type=Threading","CurrentThreadUserTime",printout));
 		threads.setThreadCpuTimeSupported(outputBoolAttr(jmxConnector,"java.lang:type=Threading","ThreadCpuTimeSupported",printout));
@@ -152,7 +170,7 @@ public class MFunc{
 	}
 	public void getRuntimeAttr(JMXConnector jmxConnector, boolean printout) 
 			throws MalformedObjectNameException, AttributeNotFoundException, InstanceNotFoundException, MBeanException,
-				ReflectionException, IOException {	
+				ReflectionException, IOException, IntrospectionException {	
 		runtime.setVmName(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmName",printout));
 		runtime.setVmVendor(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmVendor",printout));
 		runtime.setVmVersion(outputStrAttr(jmxConnector,"java.lang:type=Runtime","VmVersion",printout));
@@ -161,7 +179,7 @@ public class MFunc{
 		runtime.setLibraryPath(outputStrAttr(jmxConnector,"java.lang:type=Runtime","LibraryPath",printout));
 		runtime.setBootClassPathSupported(outputBoolAttr(jmxConnector,"java.lang:type=Runtime","BootClassPathSupported",printout));
 		runtime.setBootClassPath(outputStrAttr(jmxConnector,"java.lang:type=Runtime","BootClassPath",printout));
-		runtime.setInputArguments(outputStrAttr(jmxConnector,"java.lang:type=Runtime","InputArguments",printout));
+		runtime.setInputArguments(outputStrmapAttr(jmxConnector,"java.lang:type=Runtime","InputArguments",printout));
 		runtime.setUptime(outputLongAttr(jmxConnector,"java.lang:type=Runtime","Uptime",printout));
 		runtime.setSpecVersion(outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecVersion",printout));
 		runtime.setSpecVendor(outputStrAttr(jmxConnector,"java.lang:type=Runtime","SpecVendor",printout));
